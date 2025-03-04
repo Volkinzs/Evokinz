@@ -286,4 +286,3 @@ Sector1:AddLabel("", true)
   - Valide os valores de entrada em `AddTextbox` (ex: converter para número com `tonumber()`).
   - Para salvar configurações, use o sistema de salvamento integrado (`ConfigurationSaving`).
 
-Essa documentação abrange todas as funções que você usou em seu código, permitindo criar interfaces complexas e personalizadas com a biblioteca `GuiBase.lua`.
