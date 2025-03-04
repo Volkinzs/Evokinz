@@ -177,6 +177,98 @@ Sector:AddLabel({
 })
 ```
 
+
+---
+
+## **Criando um Separator (`AddSeparator`)**
+
+A função `Sector:AddSeparator()` cria um separador visual dentro de um setor para dividir elementos.
+
+### **Parâmetros**
+```lua
+Sector:AddSeparator({
+   Title = "Título do Separador", -- (Opcional) Título do separador.
+   Thickness = 1, -- (Opcional) Espessura do separador (padrão: 1).
+   Color = Color3.fromRGB(100, 100, 100) -- (Opcional) Cor do separador.
+})
+```
+
+### **Exemplo de Uso**
+```lua
+Sector:AddSeparator({
+   Title = "Configurações Avançadas",
+   Thickness = 2,
+   Color = Color3.fromRGB(255, 0, 0)
+})
+
+-- ou
+Sector:AddSeparator("Divisão")
+```
+
+---
+## **Adicionando um Color Picker (`AddColorPicker`)**
+
+A função `Sector:AddColorPicker()` cria um seletor de cor para escolher uma cor específica.
+
+### **Parâmetros**
+```lua
+Sector:AddColorPicker({
+   Title = "Título do Color Picker", -- (Obrigatório) Título do color picker.
+   DefaultValue = Color3.fromRGB(255, 255, 255), -- (Opcional) Valor padrão da cor.
+   Callback = function(color) end -- (Obrigatório) Função chamada quando a cor é selecionada.
+})
+```
+
+### **Exemplo de Uso**
+```lua
+Sector:AddColorPicker("Cor do Fundo", Color3.fromRGB(255, 255, 255), function(color)
+    _G.BackgroundColor = color
+end)
+
+-- ou
+Sector:AddColorPicker({
+   Title = "Cor do Texto",
+   DefaultValue = Color3.fromRGB(0, 0, 0),
+   Callback = function(selectedColor)
+       print("Cor selecionada:", selectedColor)
+   end
+})
+```
+
+---
+
+## **Adicionando um Keybind (`AddKeybind`)**
+
+A função `Sector:AddKeybind()` cria um seletor de tecla para atribuir uma tecla específica a uma ação.
+
+### **Parâmetros**
+```lua
+Sector:AddKeybind({
+   Title = "Título do Keybind", -- (Obrigatório) Título do keybind.
+   DefaultKey = Enum.KeyCode.Q, -- (Opcional) Tecla padrão (Enum.KeyCode).
+   Callback = function(key) end -- (Obrigatório) Função chamada quando a tecla é pressionada.
+})
+```
+
+### **Exemplo de Uso**
+```lua
+Sector:AddKeybind("Tecla de Salvar", Enum.KeyCode.S, function(key)
+    print("Tecla pressionada:", key)
+    -- Código para salvar configurações
+end)
+
+-- ou
+Sector:AddKeybind({
+   Title = "Tecla de Reiniciar",
+   DefaultKey = Enum.KeyCode.R,
+   Callback = function(pressedKey)
+       print("Tecla reiniciar:", pressedKey)
+       game.Players.LocalPlayer:Kick("Reiniciando...")
+   end
+})
+```
+
+
 ---
 
 ## **Exemplo de Uso Completo com Todas as Funcionalidades**
@@ -238,7 +330,7 @@ end)
 
 ---
 
-### **Explicação dos Parâmetros em Seus Códigos**
+### **Explicação dos Parâmetros **
 
 #### **Exemplo de `AddDropdown` Completo**
 ```lua
