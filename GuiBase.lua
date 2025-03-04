@@ -3476,7 +3476,7 @@ if not game:GetService("CoreGui"):FindFirstChild("Credit") then
 	TexT.TextColor3 = Color3.fromRGB(74, 50, 163);
 	TexT.TextScaled = true;
 	TexT.TextWrapped = true;
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Volkinzz/Evokinz/main/Notification"))();
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Volkinzs/Evokinz/main/NotificationBase.lua"))();
     wait()
 end
 return library;
