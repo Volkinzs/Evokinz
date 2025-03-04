@@ -1,7 +1,4 @@
 
-
-Aqui está a documentação detalhada das funções adicionais que você usa em seu código, baseada no seu exemplo e no formato da documentação anterior. Essas funções permitem criar elementos como **Dropdowns**, **Textbox**, **Toggle**, **Button**, **Label** e gerenciar **Sectors** dentro de Tabs.
-
 ---
 
 # **GuiBase.lua Documentation (Complemento)**
