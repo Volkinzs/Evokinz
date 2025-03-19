@@ -1,5 +1,5 @@
 local KeySystemGUI = {}
---1
+--2
 -- Configuração do request HTTP
 local request
 if syn then
@@ -492,8 +492,7 @@ function KeySystemGUI.create()
     return ScreenGui
 end
 
-local function getHardwareId()
-    -- Verifica se gethwid existe e tenta chamá-lo
+local function getHwid()
     if gethwid and type(gethwid) == "function" then
         local success, hwid = pcall(gethwid)
         if success and hwid then
@@ -501,7 +500,6 @@ local function getHardwareId()
         end
     end
 
-    -- Verifica se fGetHwid existe e tenta chamá-lo
     if fGetHwid and type(fGetHwid) == "function" then
         local success, hwid = pcall(fGetHwid)
         if success and hwid then
@@ -509,19 +507,26 @@ local function getHardwareId()
         end
     end
 
-    -- Se nenhuma função estiver disponível, retorna um valor padrão
-    return "HWID não disponível"
+    -- Se nenhuma função de HWID estiver disponível, cria um identificador único
+    local userId = tostring(game.Players.LocalPlayer.UserId)
+    local ipAddress = game:HttpGet("https://api.ipify.org") or "IP_NAO_DISPONIVEL"
+    return "ALT_" .. userId .. "_" .. ipAddress
 end
 
--- Função para verificar e associar a chave
 function KeySystemGUI.VerifyAndAssociateKey(inputKey)
-    local hwid = getHardwareId()
+    print("Verificando chave:", inputKey)
+
+    local hwid = getHwid()
+    print("HWID obtido:", hwid)
+
     local body = lEncode({
         key = inputKey,
         hwid = hwid
     })
+    print("Corpo da requisição:", body)
 
     local success, response = pcall(function()
+        print("Enviando requisição para o servidor...")
         return request({
             Url = "https://key-api.onrender.com/verify",
             Method = "POST",
@@ -533,8 +538,11 @@ function KeySystemGUI.VerifyAndAssociateKey(inputKey)
     end)
 
     if not success then
+        warn("Erro na requisição:", response)
         return false, "Falha na conexão com o servidor"
     end
+
+    print("Resposta do servidor:", response.StatusCode, response.Body)
 
     if response.StatusCode >= 500 then
         return false, "Erro interno do servidor (Código: " .. response.StatusCode .. ")"
@@ -549,6 +557,7 @@ function KeySystemGUI.VerifyAndAssociateKey(inputKey)
     end
 
     local decoded = lDecode(response.Body)
+    print("Resposta decodificada:", decoded)
 
     if decoded.valid then
         return true, "Chave validada com sucesso!"
