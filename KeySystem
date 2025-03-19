@@ -1,5 +1,5 @@
 local KeySystem = {}
--- 5
+-- 6
 -- Configuração do request HTTP
 local request
 if syn then
@@ -112,15 +112,15 @@ function KeySystem.create()
     local TweenService = game:GetService("TweenService")
     local Player = Players.LocalPlayer
 
+    local requestSending = false -- Variável para evitar múltiplas requisições
+
     local function CreateKeyUI()
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "KeySystemGUI"
         ScreenGui.ResetOnSpawn = false
         ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 
-        -- (Código da interface gráfica aqui...)
-        
-        
+        -- Background
         local Background = Instance.new("Frame")
         Background.Name = "Background"
         Background.Size = UDim2.new(0.25, 0, 0.35, 0)
@@ -129,8 +129,8 @@ function KeySystem.create()
         Background.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
         Background.BorderSizePixel = 0
         Background.Parent = ScreenGui
-        
-        
+
+        -- DropShadow
         local DropShadow = Instance.new("ImageLabel")
         DropShadow.Name = "DropShadow"
         DropShadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -144,8 +144,8 @@ function KeySystem.create()
         DropShadow.ScaleType = Enum.ScaleType.Slice
         DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
         DropShadow.Parent = Background
-        
-        
+
+        -- Header
         local Header = Instance.new("Frame")
         Header.Name = "Header"
         Header.Size = UDim2.new(1, 0, 0.18, 0)
@@ -153,8 +153,8 @@ function KeySystem.create()
         Header.BackgroundColor3 = Color3.fromRGB(90, 60, 220)
         Header.BorderSizePixel = 0
         Header.Parent = Background
-        
-        
+
+        -- HeaderGradient
         local HeaderGradient = Instance.new("UIGradient")
         HeaderGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 70, 230)),
@@ -162,8 +162,8 @@ function KeySystem.create()
         })
         HeaderGradient.Rotation = 45
         HeaderGradient.Parent = Header
-        
-        
+
+        -- Title
         local Title = Instance.new("TextLabel")
         Title.Name = "Title"
         Title.Size = UDim2.new(0.7, 0, 0.6, 0)
@@ -175,8 +175,8 @@ function KeySystem.create()
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.BackgroundTransparency = 1
         Title.Parent = Header
-        
-        
+
+        -- Subtitle
         local Subtitle = Instance.new("TextLabel")
         Subtitle.Name = "Subtitle"
         Subtitle.Size = UDim2.new(0.7, 0, 0.3, 0)
@@ -188,16 +188,16 @@ function KeySystem.create()
         Subtitle.TextXAlignment = Enum.TextXAlignment.Left
         Subtitle.BackgroundTransparency = 1
         Subtitle.Parent = Header
-        
-        
+
+        -- HeaderButtons
         local HeaderButtons = Instance.new("Frame")
         HeaderButtons.Name = "HeaderButtons"
         HeaderButtons.Size = UDim2.new(0.25, 0, 1, 0)
         HeaderButtons.Position = UDim2.new(0.75, 0, 0, 0)
         HeaderButtons.BackgroundTransparency = 1
         HeaderButtons.Parent = Header
-        
-        
+
+        -- ButtonLayout
         local ButtonLayout = Instance.new("UIListLayout")
         ButtonLayout.FillDirection = Enum.FillDirection.Horizontal
         ButtonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
@@ -205,8 +205,7 @@ function KeySystem.create()
         ButtonLayout.Padding = UDim.new(0.05, 0)
         ButtonLayout.Parent = HeaderButtons
 
-        
-        
+        -- CloseButton
         local CloseButton = Instance.new("TextButton")
         CloseButton.Name = "CloseButton"
         CloseButton.Size = UDim2.new(0.3, 0, 0.5, 0)
@@ -217,31 +216,31 @@ function KeySystem.create()
         CloseButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
         CloseButton.BorderSizePixel = 0
         CloseButton.Parent = HeaderButtons
-        
-       
+
+        -- UICornerClose
         local UICornerClose = Instance.new("UICorner")
         UICornerClose.CornerRadius = UDim.new(0.2, 0)
         UICornerClose.Parent = CloseButton
-        
-        
+
+        -- Container
         local Container = Instance.new("Frame")
         Container.Name = "Container"
         Container.Size = UDim2.new(0.94, 0, 0.7, 0)
         Container.Position = UDim2.new(0.05, 0, 0.25, 0)
         Container.BackgroundTransparency = 1
         Container.Parent = Background
-        
-        
+
+        -- KeyIcon
         local KeyIcon = Instance.new("ImageLabel")
         KeyIcon.Name = "KeyIcon"
         KeyIcon.Size = UDim2.new(0.15, 0, 0.15, 0)
         KeyIcon.Position = UDim2.new(0.425, 0, 0.05, 0)
         KeyIcon.BackgroundTransparency = 1
-        KeyIcon.Image = "rbxassetid://7733658504" 
+        KeyIcon.Image = "rbxassetid://7733658504"
         KeyIcon.ImageColor3 = Color3.fromRGB(130, 80, 255)
         KeyIcon.Parent = Container
-        
-        
+
+        -- KeyLabel
         local KeyLabel = Instance.new("TextLabel")
         KeyLabel.Name = "KeyLabel"
         KeyLabel.Size = UDim2.new(1, 0, 0.1, 0)
@@ -252,8 +251,8 @@ function KeySystem.create()
         KeyLabel.Font = Enum.Font.Gotham
         KeyLabel.BackgroundTransparency = 1
         KeyLabel.Parent = Container
-        
-        
+
+        -- KeyInput
         local KeyInput = Instance.new("TextBox")
         KeyInput.Name = "KeyInput"
         KeyInput.Size = UDim2.new(1, 0, 0.15, 0)
@@ -267,14 +266,14 @@ function KeySystem.create()
         KeyInput.Font = Enum.Font.Gotham
         KeyInput.ClearTextOnFocus = false
         KeyInput.Parent = Container
-        
-        
+
+        -- InputStroke
         local InputStroke = Instance.new("UIStroke")
         InputStroke.Color = Color3.fromRGB(100, 70, 230)
         InputStroke.Thickness = 1
         InputStroke.Parent = KeyInput
-        
-        
+
+        -- CheckButton
         local CheckButton = Instance.new("TextButton")
         CheckButton.Name = "CheckButton"
         CheckButton.Size = UDim2.new(1, 0, 0.15, 0)
@@ -286,8 +285,8 @@ function KeySystem.create()
         CheckButton.TextSize = 20
         CheckButton.Font = Enum.Font.GothamBold
         CheckButton.Parent = Container
-        
-        
+
+        -- ButtonGradient
         local ButtonGradient = Instance.new("UIGradient")
         ButtonGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 70, 230)),
@@ -295,8 +294,8 @@ function KeySystem.create()
         })
         ButtonGradient.Rotation = 45
         ButtonGradient.Parent = CheckButton
-        
-        
+
+        -- StatusLabel
         local StatusLabel = Instance.new("TextLabel")
         StatusLabel.Name = "StatusLabel"
         StatusLabel.Size = UDim2.new(1, 0, 0.1, 0)
@@ -307,8 +306,8 @@ function KeySystem.create()
         StatusLabel.Font = Enum.Font.Gotham
         StatusLabel.BackgroundTransparency = 1
         StatusLabel.Parent = Container
-        
-        
+
+        -- ToggleButton
         local ToggleButton = Instance.new("TextButton")
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Size = UDim2.new(0.07, 0, 0.07, 0)
@@ -321,8 +320,8 @@ function KeySystem.create()
         ToggleButton.BackgroundColor3 = Color3.fromRGB(100, 70, 230)
         ToggleButton.BorderSizePixel = 0
         ToggleButton.Parent = ScreenGui
-        
-        
+
+        -- ToggleGradient
         local ToggleGradient = Instance.new("UIGradient")
         ToggleGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 70, 230)),
@@ -330,13 +329,13 @@ function KeySystem.create()
         })
         ToggleGradient.Rotation = 45
         ToggleGradient.Parent = ToggleButton
-        
-       
+
+        -- UICornerToggle
         local UICornerToggle = Instance.new("UICorner")
-        UICornerToggle.CornerRadius = UDim.new(1, 0)  
+        UICornerToggle.CornerRadius = UDim.new(1, 0)
         UICornerToggle.Parent = ToggleButton
-        
-        
+
+        -- ToggleShadow
         local ToggleShadow = Instance.new("ImageLabel")
         ToggleShadow.Name = "ToggleShadow"
         ToggleShadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -350,107 +349,96 @@ function KeySystem.create()
         ToggleShadow.ScaleType = Enum.ScaleType.Slice
         ToggleShadow.SliceCenter = Rect.new(49, 49, 450, 450)
         ToggleShadow.Parent = ToggleButton
-        
-        
+
+        -- UICorner
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(0, 8)
         UICorner.Parent = Background
-        
+
+        -- UICornerHeader
         local UICornerHeader = Instance.new("UICorner")
         UICornerHeader.CornerRadius = UDim.new(0, 8)
         UICornerHeader.Parent = Header
-        
+
+        -- UICornerButton
         local UICornerButton = Instance.new("UICorner")
         UICornerButton.CornerRadius = UDim.new(0, 6)
         UICornerButton.Parent = CheckButton
-        
+
+        -- UICornerInput
         local UICornerInput = Instance.new("UICorner")
         UICornerInput.CornerRadius = UDim.new(0, 6)
         UICornerInput.Parent = KeyInput
-        
-        
+
+        -- Animações e interações
         local isMinimized = false
         local isToggleVisible = true
         local originalSize = Background.Size
         local originalPosition = Background.Position
         local minimizedSize = UDim2.new(0.35, 0, 0.06, 0)
-        
-        
+
         local function animateProperty(object, property, endValue, duration)
             local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
             local tween = TweenService:Create(object, tweenInfo, {[property] = endValue})
             tween:Play()
             return tween
         end
-        
-        
+
         CloseButton.MouseButton1Click:Connect(function()
             ScreenGui:Destroy()
         end)
-        
-        
+
         CloseButton.MouseEnter:Connect(function()
             animateProperty(CloseButton, "BackgroundColor3", Color3.fromRGB(235, 70, 70), 0.2)
         end)
-        
+
         CloseButton.MouseLeave:Connect(function()
             animateProperty(CloseButton, "BackgroundColor3", Color3.fromRGB(200, 60, 60), 0.2)
         end)
-        
-        
+
         ToggleButton.MouseButton1Click:Connect(function()
             isToggleVisible = not isToggleVisible
-            
-            if isToggleVisible then
-                Background.Visible = true
-            else
-                Background.Visible = false
-            end
+            Background.Visible = isToggleVisible
         end)
-        
-        
+
         ToggleButton.MouseEnter:Connect(function()
             animateProperty(ToggleButton, "BackgroundColor3", Color3.fromRGB(130, 100, 255), 0.2)
         end)
-        
+
         ToggleButton.MouseLeave:Connect(function()
             animateProperty(ToggleButton, "BackgroundColor3", Color3.fromRGB(100, 70, 230), 0.2)
         end)
-        
-        
+
         CheckButton.MouseEnter:Connect(function()
             ButtonGradient.Offset = Vector2.new(0.1, 0)
         end)
-        
+
         CheckButton.MouseLeave:Connect(function()
             ButtonGradient.Offset = Vector2.new(0, 0)
         end)
-        
-        
+
         local isDragging = false
         local dragInput = nil
         local dragStart = nil
         local startPos = nil
-        
+
         local function updateDrag(input)
             local delta = input.Position - dragStart
             Background.Position = UDim2.new(
-                startPos.X.Scale, 
-                startPos.X.Offset + delta.X, 
-                startPos.Y.Scale, 
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
                 startPos.Y.Offset + delta.Y
             )
         end
-        
-        
+
         Header.InputBegan:Connect(function(input)
-            if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and 
+            if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and
             not isDragging then
                 isDragging = true
                 dragStart = input.Position
                 startPos = Background.Position
-                
-                
+
                 input.Changed:Connect(function()
                     if input.UserInputState == Enum.UserInputState.End then
                         isDragging = false
@@ -458,45 +446,41 @@ function KeySystem.create()
                 end)
             end
         end)
-        
-        
+
         Header.InputChanged:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                 dragInput = input
             end
         end)
-        
+
         UserInputService.InputChanged:Connect(function(input)
             if input == dragInput and isDragging then
                 updateDrag(input)
             end
         end)
-        
-        
+
         local isToggleDragging = false
         local toggleDragInput = nil
         local toggleDragStart = nil
         local toggleStartPos = nil
-        
+
         local function updateToggleDrag(input)
             local delta = input.Position - toggleDragStart
             ToggleButton.Position = UDim2.new(
-                toggleStartPos.X.Scale, 
-                toggleStartPos.X.Offset + delta.X, 
-                toggleStartPos.Y.Scale, 
+                toggleStartPos.X.Scale,
+                toggleStartPos.X.Offset + delta.X,
+                toggleStartPos.Y.Scale,
                 toggleStartPos.Y.Offset + delta.Y
             )
         end
-        
-       
+
         ToggleButton.InputBegan:Connect(function(input)
-            if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and 
+            if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and
             not isToggleDragging then
                 isToggleDragging = true
                 toggleDragStart = input.Position
                 toggleStartPos = ToggleButton.Position
-                
-                
+
                 local dragConnection
                 dragConnection = input.Changed:Connect(function()
                     if input.UserInputState == Enum.UserInputState.End then
@@ -506,56 +490,54 @@ function KeySystem.create()
                 end)
             end
         end)
-        
-        
+
         ToggleButton.InputChanged:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                 toggleDragInput = input
             end
         end)
-        
+
         UserInputService.InputChanged:Connect(function(input)
             if input == toggleDragInput and isToggleDragging then
                 updateToggleDrag(input)
             end
         end)
-        
+
         CheckButton.MouseButton1Click:Connect(function()
             if requestSending then return end
             requestSending = true
-            
+
             local inputKey = KeyInput.Text:gsub("%s+", "")
             StatusLabel.Text = "Verificando chave..."
             StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        
-            local success, message = VerifyAndAssociateKey(inputKey)
-        
-            -- Garanta que `message` nunca seja nil
+
+            local success, message = KeySystem.VerifyAndAssociateKey(inputKey)
+
             if not message then
                 message = "Erro desconhecido"
             end
-        
+
             if success then
                 StatusLabel.Text = message
                 StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
                 animateProperty(CheckButton, "BackgroundColor3", Color3.fromRGB(80, 200, 120), 0.3)
-                
+
                 wait(1.5)
-                
+
                 animateProperty(Background, "Size", UDim2.new(0, 0, 0, 0), 0.5)
                 animateProperty(Background, "Position", UDim2.new(0.5, 0, 0.5, 0), 0.5).Completed:Connect(function()
                     ScreenGui:Destroy()
-                    OpenMainMenu()
+                    KeySystem.onSuccess()
                 end)
             else
                 StatusLabel.Text = message
                 StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
                 animateErrorEffects(KeyInput)
             end
-            
+
             requestSending = false
         end)
-        
+
         function animateErrorEffects(inputField)
             local originalColor = inputField.BackgroundColor3
             animateProperty(inputField, "BackgroundColor3", Color3.fromRGB(180, 40, 40), 0.2).Completed:Connect(function()
@@ -577,62 +559,11 @@ function KeySystem.create()
             inputField.Position = originalPosition
             KeyInput.Text = ""
         end
-        
-      
+
         Background.Size = UDim2.new(0, 0, 0, 0)
         Background.Position = UDim2.new(0.5, 0, 0.5, 0)
         wait(0.1)
         animateProperty(Background, "Size", originalSize, 0.5)
-        
-        return ScreenGui
-    end
-    function VerifyAndAssociateKey(inputKey)
-        local hwid = getHardwareId()
-        local body = lEncode({
-            key = tostring(inputKey),
-            hwid = tostring(hwid) 
-        })
-        print(body)
-        local success, response = pcall(function()
-            return request({
-                Url = "https://key-api.onrender.com/api/keys/verify",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                },
-                Body = body,
-            })
-        end)
-        if not success then
-            return false, "Falha na conexão com o servidor"
-        end
-        if response.StatusCode >= 500 then
-            return false, "Erro interno do servidor (Código: "..response.StatusCode..")"
-        end
-        if response.StatusCode == 404 then
-            return false, "Key nao encontrada"
-        elseif response.StatusCode == 403 then
-            return false, "HWID nao corresponde"
-        elseif response.StatusCode == 410 then
-            return false, "Chave expirada"
-        end
-    
-        local decoded
-        pcall(function()
-            decoded = lDecode(response.Body)
-        end)
-        if not decoded then
-            warn("Resposta do servidor não é JSON válido:", response.Body)
-            return false, "Resposta do servidor inválida"
-        end
-    
-        -- Retorne explicitamente o resultado da validação
-        if decoded.valid then
-            return true, "Chave validada com sucesso!"
-        else
-            return false, decoded.message or "Erro na validação da chave"
-        end
-    end
 
         return ScreenGui
     end
