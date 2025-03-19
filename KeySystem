@@ -1,5 +1,5 @@
 local KeySystemGUI = {}
--- 3
+-- 4
 -- Configuração do request HTTP
 local request
 if syn then
@@ -12,6 +12,17 @@ else
         return {StatusCode = 0, Body = "HTTP não suportado"}
     end
 end
+
+-- Funções auxiliares
+local function lEncode(data)
+    return game:GetService("HttpService"):JSONEncode(data)
+end
+
+local function lDecode(data)
+    return game:GetService("HttpService"):JSONDecode(data)
+end
+
+-- Função para obter o HWID
 local function getHardwareId()
     -- Verifica se gethwid existe e tenta chamá-lo
     if gethwid and type(gethwid) == "function" then
@@ -47,51 +58,6 @@ local function getHardwareId()
     local uniqueId = "ALT_" .. userId .. "_" .. ipAddress  -- Prefixo "ALT_" para indicar que é alternativo
 
     return uniqueId, false  -- Retorna o HWID alternativo e um indicador de que é alternativo
-end
-
--- Funções auxiliares
-local function lEncode(data)
-    return game:GetService("HttpService"):JSONEncode(data)
-end
-
-local function lDecode(data)
-    return game:GetService("HttpService"):JSONDecode(data)
-end
-
--- Função para obter o HWID
-local function getHwid()
-    if gethwid and type(gethwid) == "function" then
-        local success, hwid = pcall(gethwid)
-        if success and hwid then
-            return hwid
-        end
-    end
-
-    if fGetHwid and type(fGetHwid) == "function" then
-        local success, hwid = pcall(fGetHwid)
-        if success and hwid then
-            return hwid
-        end
-    end
-
-    -- Se nenhuma função de HWID estiver disponível, cria um identificador único usando ID do usuário e IP
-    local function getIpAddress()
-        local success, ip = pcall(function()
-            return game:HttpGet("https://api.ipify.org")
-        end)
-        return success and ip or "IP_NAO_DISPONIVEL"
-    end
-
-    -- Obtém o ID do usuário no Roblox
-    local userId = tostring(game.Players.LocalPlayer.UserId)
-
-    -- Obtém o endereço IP
-    local ipAddress = getIpAddress()
-
-    -- Combina o ID do usuário e o IP para criar um identificador único
-    local uniqueId = "ALT_" .. userId .. "_" .. ipAddress  -- Prefixo "ALT_" para indicar que é alternativo
-
-    return uniqueId
 end
 
 -- Função para criar a UI de verificação de chave
@@ -475,7 +441,7 @@ function KeySystemGUI.create()
         StatusLabel.Text = "Verificando chave..."
         StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-        local success, message = VerifyAndAssociateKey(inputKey)
+        local success, message = KeySystemGUI.VerifyAndAssociateKey(inputKey)
 
         if success then
             StatusLabel.Text = message
@@ -528,18 +494,15 @@ function KeySystemGUI.create()
     return ScreenGui
 end
 
-
-
+-- Função para verificar e associar a chave
 function KeySystemGUI.VerifyAndAssociateKey(inputKey)
     local hwid = getHardwareId()
     local body = lEncode({
         key = inputKey,
         hwid = hwid
     })
-    print("Corpo da requisição:", body)
 
     local success, response = pcall(function()
-        print("Enviando requisição para o servidor...")
         return request({
             Url = "https://key-api.onrender.com/verify",
             Method = "POST",
@@ -551,11 +514,8 @@ function KeySystemGUI.VerifyAndAssociateKey(inputKey)
     end)
 
     if not success then
-        warn("Erro na requisição:", response)
         return false, "Falha na conexão com o servidor"
     end
-
-    print("Resposta do servidor:", response.StatusCode, response.Body)
 
     if response.StatusCode >= 500 then
         return false, "Erro interno do servidor (Código: " .. response.StatusCode .. ")"
@@ -570,7 +530,6 @@ function KeySystemGUI.VerifyAndAssociateKey(inputKey)
     end
 
     local decoded = lDecode(response.Body)
-    print("Resposta decodificada:", decoded)
 
     if decoded.valid then
         return true, "Chave validada com sucesso!"
