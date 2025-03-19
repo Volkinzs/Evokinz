@@ -1,5 +1,5 @@
 local KeySystemGUI = {}
---2
+-- 3
 -- Configuração do request HTTP
 local request
 if syn then
@@ -11,6 +11,42 @@ else
         warn("Nenhum método de requisição HTTP encontrado!")
         return {StatusCode = 0, Body = "HTTP não suportado"}
     end
+end
+local function getHardwareId()
+    -- Verifica se gethwid existe e tenta chamá-lo
+    if gethwid and type(gethwid) == "function" then
+        local success, hwid = pcall(gethwid)
+        if success and hwid then
+            return hwid, true  -- Retorna o HWID real e um indicador de que é real
+        end
+    end
+
+    -- Verifica se fGetHwid existe e tenta chamá-lo
+    if fGetHwid and type(fGetHwid) == "function" then
+        local success, hwid = pcall(fGetHwid)
+        if success and hwid then
+            return hwid, true  -- Retorna o HWID real e um indicador de que é real
+        end
+    end
+
+    -- Se nenhuma função de HWID estiver disponível, cria um identificador único usando ID do usuário e IP
+    local function getIpAddress()
+        local success, ip = pcall(function()
+            return game:HttpGet("https://api.ipify.org")
+        end)
+        return success and ip or "IP_NAO_DISPONIVEL"
+    end
+
+    -- Obtém o ID do usuário no Roblox
+    local userId = tostring(game.Players.LocalPlayer.UserId)
+
+    -- Obtém o endereço IP
+    local ipAddress = getIpAddress()
+
+    -- Combina o ID do usuário e o IP para criar um identificador único
+    local uniqueId = "ALT_" .. userId .. "_" .. ipAddress  -- Prefixo "ALT_" para indicar que é alternativo
+
+    return uniqueId, false  -- Retorna o HWID alternativo e um indicador de que é alternativo
 end
 
 -- Funções auxiliares
@@ -492,33 +528,10 @@ function KeySystemGUI.create()
     return ScreenGui
 end
 
-local function getHwid()
-    if gethwid and type(gethwid) == "function" then
-        local success, hwid = pcall(gethwid)
-        if success and hwid then
-            return hwid
-        end
-    end
 
-    if fGetHwid and type(fGetHwid) == "function" then
-        local success, hwid = pcall(fGetHwid)
-        if success and hwid then
-            return hwid
-        end
-    end
-
-    -- Se nenhuma função de HWID estiver disponível, cria um identificador único
-    local userId = tostring(game.Players.LocalPlayer.UserId)
-    local ipAddress = game:HttpGet("https://api.ipify.org") or "IP_NAO_DISPONIVEL"
-    return "ALT_" .. userId .. "_" .. ipAddress
-end
 
 function KeySystemGUI.VerifyAndAssociateKey(inputKey)
-    print("Verificando chave:", inputKey)
-
-    local hwid = getHwid()
-    print("HWID obtido:", hwid)
-
+    local hwid = getHardwareId()
     local body = lEncode({
         key = inputKey,
         hwid = hwid
