@@ -1,5 +1,5 @@
 local KeySystemGUI = {}
-
+--1
 -- Configuração do request HTTP
 local request
 if syn then
@@ -492,9 +492,30 @@ function KeySystemGUI.create()
     return ScreenGui
 end
 
+local function getHardwareId()
+    -- Verifica se gethwid existe e tenta chamá-lo
+    if gethwid and type(gethwid) == "function" then
+        local success, hwid = pcall(gethwid)
+        if success and hwid then
+            return hwid
+        end
+    end
+
+    -- Verifica se fGetHwid existe e tenta chamá-lo
+    if fGetHwid and type(fGetHwid) == "function" then
+        local success, hwid = pcall(fGetHwid)
+        if success and hwid then
+            return hwid
+        end
+    end
+
+    -- Se nenhuma função estiver disponível, retorna um valor padrão
+    return "HWID não disponível"
+end
+
 -- Função para verificar e associar a chave
 function KeySystemGUI.VerifyAndAssociateKey(inputKey)
-    local hwid = getHwid()
+    local hwid = getHardwareId()
     local body = lEncode({
         key = inputKey,
         hwid = hwid
