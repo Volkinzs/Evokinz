@@ -1,6 +1,6 @@
 local DataSender = {}
 
--- Configuração do request HTTP
+
 local request
 if syn then
     request = syn.request
