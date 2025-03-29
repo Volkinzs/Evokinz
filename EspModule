@@ -1,0 +1,290 @@
+-- Módulo de ESP
+local ESPModule = {}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+
+-- Configurações do ESP moderno
+ESPModule.ESP_SETTINGS = {
+    HighlightTransparency = 0.7,
+    ShowDistance = true,
+    ShowHealth = true,
+    BoxThickness = 1,
+    TextSize = 14,
+    Font = Enum.Font.GothamSemibold,
+    UpdateRate = 0.1,  -- Atualiza a cada 0.1 segundos
+    MaxDisplayDistance = 2400,  -- ESP só aparece se jogador estiver a menos de 2400 studs
+    FadeStartDistance = 2400,   -- Começa a ficar transparente a partir desta distância
+}
+
+-- Criar ou obter container do ESP
+function ESPModule.getESPContainer()
+    local container = CoreGui:FindFirstChild("ModernESPContainer")
+    if not container then
+        container = Instance.new("Folder")
+        container.Name = "ModernESPContainer"
+        container.Parent = CoreGui
+    end
+    return container
+end
+
+-- Função para formatar distância
+function ESPModule.formatDistance(distance)
+    return math.floor(distance) .. "m"
+end
+
+-- Calcular transparência baseada na distância
+function ESPModule.calculateTransparencyByDistance(distance)
+    if distance > ESPModule.ESP_SETTINGS.MaxDisplayDistance then
+        return 1  -- Completamente invisível
+    elseif distance < ESPModule.ESP_SETTINGS.FadeStartDistance then
+        return 0  -- Completamente visível
+    else
+        -- Fade gradual entre distância inicial e máxima
+        local fadeRange = ESPModule.ESP_SETTINGS.MaxDisplayDistance - ESPModule.ESP_SETTINGS.FadeStartDistance
+        local fadeAmount = (distance - ESPModule.ESP_SETTINGS.FadeStartDistance) / fadeRange
+        return fadeAmount
+    end
+end
+
+-- Adicionar ESP ao jogador
+function ESPModule.addESPToPlayer(player)
+    local espContainer = ESPModule.getESPContainer()
+    -- Criar pasta de ESP para o jogador
+    local playerESP = Instance.new("Folder")
+    playerESP.Name = player.Name .. "_ESP"
+    playerESP.Parent = espContainer
+    -- Último tempo de atualização
+    local lastUpdateTime = 0
+
+    local function onCharacterAdded(character)
+        if not character then return end
+        -- Limpar ESP existente para este jogador
+        playerESP:ClearAllChildren()
+        -- Aguardar o personagem do jogador ser carregado
+        local character = player.Character or player.CharacterAdded:Wait()
+        -- Encontrar o modelo do jogador no Workspace
+        local entity = Workspace.Entities:FindFirstChild(player.Name)
+        if not entity then
+            warn("Modelo do jogador não encontrado no Workspace para " .. player.Name)
+            return
+        end
+        -- Obter a propriedade Faction do modelo do jogador
+        local faction = nil
+        if entity:FindFirstChild("Faction") then
+            faction = entity.Faction.Value
+        end
+        if not faction then
+            warn("Faction não encontrada para o jogador " .. player.Name)
+            return
+        end
+        -- Criar highlight com estilo minimalista
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "Outline"
+        highlight.Adornee = character
+        highlight.FillTransparency = ESPModule.ESP_SETTINGS.HighlightTransparency
+        highlight.OutlineTransparency = 0.3
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        -- Definir a cor com base na facção usando operador ternário-like
+        highlight.OutlineColor = (faction == "GHOUL" and Color3.new(0.4, 0, 0)) or
+                                 (faction == "CCG" and Color3.new(0.7, 0.8, 1)) or
+                                 Color3.new(1, 1, 1)  -- Branco padrão se a facção não for reconhecida
+        highlight.Parent = playerESP
+        -- Criar um BillboardGui compacto
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Name = "InfoDisplay"
+        billboardGui.Adornee = character:WaitForChild("Head", 10)
+        billboardGui.Size = UDim2.new(0, 100, 0, 50)
+        billboardGui.AlwaysOnTop = true
+        billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+        billboardGui.Parent = playerESP
+        -- Adicionar um frame de fundo limpo
+        local background = Instance.new("Frame")
+        background.Name = "Background"
+        background.Size = UDim2.new(1, 0, 1, 0)
+        background.BackgroundTransparency = 0.6
+        background.BackgroundColor3 = Color3.new(0, 0, 0)
+        background.BorderSizePixel = 0
+        background.Parent = billboardGui
+        -- Adicionar raio de canto para visual moderno
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 4)
+        corner.Parent = background
+        -- Adicionar nome do jogador com fonte limpa
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Name = "PlayerName"
+        nameLabel.Text = player.Name
+        nameLabel.TextSize = ESPModule.ESP_SETTINGS.TextSize
+        nameLabel.Font = ESPModule.ESP_SETTINGS.Font
+        nameLabel.TextColor3 = (faction == "GHOUL" and Color3.new(0.4, 0, 0)) or
+                                (faction == "CCG" and Color3.new(0.7, 0.8, 1)) or
+                                Color3.new(1, 1, 1)  -- Branco padrão se a facção não for reconhecida
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        nameLabel.Parent = billboardGui
+        -- Exibição de saúde (barra minimalista)
+        local healthContainer = Instance.new("Frame")
+        healthContainer.Name = "HealthContainer"
+        healthContainer.Size = UDim2.new(0.8, 0, 0.15, 0)
+        healthContainer.Position = UDim2.new(0.1, 0, 0.5, 0)
+        healthContainer.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+        healthContainer.BackgroundTransparency = 0.3
+        healthContainer.BorderSizePixel = 0
+        healthContainer.Parent = billboardGui
+        -- Adicionar raio de canto à barra de saúde
+        local healthCorner = Instance.new("UICorner")
+        healthCorner.CornerRadius = UDim.new(0, 2)
+        healthCorner.Parent = healthContainer
+        local healthBar = Instance.new("Frame")
+        healthBar.Name = "HealthBar"
+        healthBar.Size = UDim2.new(1, 0, 1, 0)
+        healthBar.BackgroundColor3 = Color3.new(0.2, 0.8, 0.2)
+        healthBar.BorderSizePixel = 0
+        healthBar.Parent = healthContainer
+        -- Adicionar raio de canto ao preenchimento da barra de saúde
+        local fillCorner = Instance.new("UICorner")
+        fillCorner.CornerRadius = UDim.new(0, 2)
+        fillCorner.Parent = healthBar
+        -- Exibição de distância (texto minimalista)
+        local distanceLabel = Instance.new("TextLabel")
+        distanceLabel.Name = "Distance"
+        distanceLabel.Text = ""
+        distanceLabel.TextSize = ESPModule.ESP_SETTINGS.TextSize - 2
+        distanceLabel.Font = ESPModule.ESP_SETTINGS.Font
+        distanceLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+        distanceLabel.BackgroundTransparency = 1
+        distanceLabel.Size = UDim2.new(1, 0, 0.3, 0)
+        distanceLabel.Position = UDim2.new(0, 0, 0.7, 0)
+        distanceLabel.Parent = billboardGui
+        -- Obter humanoid para atualizações de saúde
+        local humanoid = character:WaitForChild("Humanoid", 10)
+        -- Atualizar informações do ESP a uma taxa menor para melhor desempenho
+        local function updateESP()
+            if not character or not character.Parent or not playerESP.Parent then
+                return
+            end
+            -- Verificar se devemos atualizar com base no tempo
+            local currentTime = tick()
+            if currentTime - lastUpdateTime < ESPModule.ESP_SETTINGS.UpdateRate then
+                return
+            end
+            lastUpdateTime = currentTime
+            -- Verificar distância para determinar a visibilidade
+            local camera = workspace.CurrentCamera
+            local distance = 0
+            if camera and character.PrimaryPart then
+                distance = (character.PrimaryPart.Position - camera.CFrame.Position).Magnitude
+                -- Calcular transparência baseada na distância
+                local distanceTransparency = ESPModule.calculateTransparencyByDistance(distance)
+                -- Aplicar transparência a todos os elementos
+                local isVisible = distanceTransparency < 1
+                billboardGui.Enabled = isVisible
+                highlight.Enabled = isVisible
+                if isVisible then
+                    -- Ajustar transparência dos elementos
+                    highlight.FillTransparency = math.min(0.7 + distanceTransparency * 0.3, 1)
+                    highlight.OutlineTransparency = math.min(0.3 + distanceTransparency * 0.7, 1)
+                    background.BackgroundTransparency = math.min(0.6 + distanceTransparency * 0.4, 1)
+                    nameLabel.TextTransparency = distanceTransparency
+                    distanceLabel.TextTransparency = distanceTransparency
+                    healthContainer.BackgroundTransparency = math.min(0.3 + distanceTransparency * 0.7, 1)
+                    -- Atualizar texto de distância se visível
+                    if ESPModule.ESP_SETTINGS.ShowDistance then
+                        distanceLabel.Text = ESPModule.formatDistance(distance)
+                    end
+                end
+            end
+            -- Atualizar cores baseadas no time
+            local teamColor = player.Team and player.Team.TeamColor.Color or Color3.new(1, 1, 1)
+            highlight.FillColor = teamColor
+            highlight.OutlineColor = teamColor
+            -- Atualizar barra de saúde com transição de cor suave
+            if humanoid and ESPModule.ESP_SETTINGS.ShowHealth and billboardGui.Enabled then
+                local healthPercentage = humanoid.Health / humanoid.MaxHealth
+                healthBar.Size = UDim2.new(math.clamp(healthPercentage, 0, 1), 0, 1, 0)
+                -- Gradiente de cor: verde para amarelo para vermelho
+                local r = math.clamp(2 - (2 * healthPercentage), 0, 1)
+                local g = math.clamp(2 * healthPercentage, 0, 1)
+                healthBar.BackgroundColor3 = Color3.new(r, g, 0)
+            end
+        end
+        -- Conectar função de atualização ao Heartbeat
+        local updateConnection = RunService.Heartbeat:Connect(updateESP)
+        -- Limpar quando o personagem for removido
+        character.AncestryChanged:Connect(function(_, parent)
+            if parent == nil then
+                updateConnection:Disconnect()
+                playerESP:ClearAllChildren()
+            end
+        end)
+    end
+    -- Lidar com eventos de adição/remoção de personagem
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+    local characterAddedConnection = player.CharacterAdded:Connect(onCharacterAdded)
+    -- Limpar conexões quando o jogador sair
+    player.AncestryChanged:Connect(function(_, parent)
+        if parent == nil then
+            characterAddedConnection:Disconnect()
+            playerESP:Destroy()
+        end
+    end)
+end
+
+-- Remover ESP do jogador
+function ESPModule.removeESPFromPlayer(player)
+    local espContainer = ESPModule.getESPContainer()
+    local playerESP = espContainer:FindFirstChild(player.Name .. "_ESP")
+    if playerESP then
+        playerESP:Destroy()
+    end
+end
+
+-- Criar container ESP
+function ESPModule.createESPContainer()
+    local espContainer = ESPModule.getESPContainer()
+    return espContainer
+end
+
+-- Adicionar ESP aos jogadores existentes
+function ESPModule.addESPToExistingPlayers()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer then  -- Não aplicar ESP ao jogador local
+            ESPModule.addESPToPlayer(player)
+        end
+    end
+end
+
+-- Monitorar novos jogadores
+function ESPModule.monitorNewPlayers()
+    Players.PlayerAdded:Connect(function(player)
+        if player ~= Players.LocalPlayer then
+            ESPModule.addESPToPlayer(player)
+        end
+    end)
+end
+
+-- Monitorar jogadores que saem
+function ESPModule.monitorPlayerRemovals()
+    Players.PlayerRemoving:Connect(ESPModule.removeESPFromPlayer)
+end
+
+-- Função para ativar/desativar o ESP
+function ESPModule.toggleESP(enable)
+    local espContainer = ESPModule.createESPContainer()
+    if enable then
+        ESPModule.addESPToExistingPlayers()
+        ESPModule.monitorNewPlayers()
+        ESPModule.monitorPlayerRemovals()
+    else
+        for _, player in pairs(Players:GetPlayers()) do
+            ESPModule.removeESPFromPlayer(player)
+        end
+        espContainer:ClearAllChildren()
+    end
+end
+
+return ESPModule
