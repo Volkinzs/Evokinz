@@ -243,12 +243,6 @@ function ESPModule.removeESPFromPlayer(player)
     end
 end
 
--- Criar container ESP
-function ESPModule.createESPContainer()
-    local espContainer = ESPModule.getESPContainer()
-    return espContainer
-end
-
 -- Adicionar ESP aos jogadores existentes
 function ESPModule.addESPToExistingPlayers()
     for _, player in pairs(Players:GetPlayers()) do
@@ -274,7 +268,7 @@ end
 
 -- Função para ativar/desativar o ESP
 function ESPModule.toggleESP(enable)
-    local espContainer = ESPModule.createESPContainer()
+    local espContainer = ESPModule.getESPContainer()
     if enable then
         ESPModule.addESPToExistingPlayers()
         ESPModule.monitorNewPlayers()
