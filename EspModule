@@ -19,6 +19,13 @@ ESPModule.ESP_SETTINGS = {
     FadeStartDistance = 2400,   -- Começa a ficar transparente a partir desta distância
 }
 
+-- Função para atualizar as configurações do ESP
+function ESPModule.updateSettings(newSettings)
+    for key, value in pairs(newSettings) do
+        ESPModule.ESP_SETTINGS[key] = value
+    end
+end
+
 -- Criar ou obter container do ESP
 function ESPModule.getESPContainer()
     local container = CoreGui:FindFirstChild("ModernESPContainer")
