@@ -95,7 +95,7 @@ function ESPModule.addESPToPlayer(player)
         highlight.OutlineTransparency = 0.3
         highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         -- Definir a cor com base na facção usando operador ternário-like
-        highlight.OutlineColor = (faction == "GHOUL" and Color3.new(0.4, 0, 0)) or
+        highlight.OutlineColor = (faction == "Neutral" and Color3.new(0.4, 0, 0)) or
                                  (faction == "CCG" and Color3.new(0.7, 0.8, 1)) or
                                  Color3.new(1, 1, 1)  -- Branco padrão se a facção não for reconhecida
         highlight.Parent = playerESP
